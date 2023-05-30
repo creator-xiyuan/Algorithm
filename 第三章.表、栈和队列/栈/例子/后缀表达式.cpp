@@ -101,6 +101,8 @@ int main(){
                 	//因为栈顶元素是被减数，所以需要先弹出并记录 
                 	int temp = TopAndPop(numS) - '0';
                     Push((TopAndPop(numS) - '0') - temp + '0', numS);
+                    //这个是错误的！因为在C语言中，运算符的计算顺序具有不确定性 
+                    //Push(-(TopAndPop(numS) - '0') + TopAndPop(numS), numS);
                     break;
 				}
                 case '/':
