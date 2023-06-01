@@ -118,7 +118,7 @@ struct TreeNode
 ```
 
 #### 2.树的遍历及应用
-树有很多应用。流行的用法之一是Unix等操作系统中的目录结构（严格来说是类树）
+树有很多应用。流行的用法之一是Unix等**操作系统中的目录结构**（严格来说是类树）
 - 先序遍历——列出目录中的所有文件
 ```C
 static void ListDir(DirectoryOrFile D, int Depth)
@@ -234,6 +234,62 @@ int Height(Tree T)
 
 
 # 第五章——散列
+查找树ADT允许对一组元素进行各种操作。本章讨论**散列表ADT**只支持二叉查找树所允许的一部分操作
+散列是一种以常数平均时间执行插入、删除和查找的技术，但是那些需要元素间任何排序信息的操作将不会得到有效的支持
+
+### 5.2 散列函数
+如果输入的关键字是整数，则一般合理的方法就是直接返回`Key mod TableSize`的结果
+好的办法是保证表的大小是**素数**，这样散列函数不仅算起来简单，而且关键字的分配也很均匀（若表的大小是10而关键字都是以0为个位，则是个不好的选择）
+**通常，关键字是字符串**，在这种情形下，**散列函数需要仔细地选择**
+
+<strong>1. 将字符串中字符的ASCII码值加起来</strong>
+```C
+typedef unsigned int Index;
+
+Index Hash(const char *Key, int TableSize)
+{
+    unsigned int HashVal = 0;
+    while(*Key)
+        HashVal += *Key++;
+    return HashVal % TableSize;
+}
+```
+**如果表很大，该函数则不会很好的分配关键字**（假设TableSize=10007，并设所有的关键字至多8个字符长，则HashVal的值至多为127*8=1016，这显然不是一种均匀的分配）
+
+<strong>2. 考察前三个字符</strong>
+```C
+//假设Key至少由2个字符外加NULL结束
+//值27表示英文字母个数外加一个空格
+Index Hash(const char *Key, int TableSize)
+{
+    return (Key[0] + 27 * Key[1] + 729 * Key[2]) % TableSize;
+}
+```
+虽然三个字符有$26^3=17576$种可能的组合，但查阅字典发现实际组合只有2851种
+所以当散列表足够大时这个函数还是不合适
+
+<strong>2. 考察所有字符</strong>
+该函数计算$\sum_{i=0}^{KeySize - 1}{Key[KeySize - i - 1] * 32^i}$
+```C
+Index Hash(const char *Key, int TableSize)
+{
+    unsigned int HashVal = 0;
+    //选择32是由于进行位运算速度更快
+    while(*Key)
+        HashVal = (Hashval << 5) + *Key++;
+    return HashVal % TableSize;
+}
+```
+如果关键词特别长，那么散列函数的计算将会花费过多时间
+在这种情况下，通常的做法是不使用所有的字符，而是根据关键字的长度和性质做出选择
+
+### 5.3 分离链接法
+`见代码实现`
+如果在散列的诸例程中不包括删除操作，那么最好不要使用表头（不能简化问题且会浪费大量空间）
+除链表外，任何方案都有可能用来解决冲突现象——一颗二叉查找树甚至另外一个散列表，但是如果表足够大且散列函数足够好，那么就没有必要进行任何复杂的尝试
+
+
+### 5.4 开放寻址法
 
 
 
